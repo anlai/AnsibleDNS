@@ -1,0 +1,18 @@
+http:
+  routers:
+{% for router_service in (router_service_mapping.keys() | list) %}
+    {{ router_service }}-router:
+      entryPoints:
+      - "websecure"
+      tls:
+        certresolver: "letsencrypt"
+      rule: "Host(`{{ router_service }}.{{ cloudflare_domain }}`)"
+      service: "{{ router_service }}"
+{% endfor %}
+  services:
+{% for router_service in (router_service_mapping.keys() | list) %}
+    {{ router_service }}:
+      loadBalancer:
+        servers:
+        - url: "http{{ 's' if router_service_mapping[router_service]['https'] is defined and router_service_mapping[router_service]['https'] else '' }}://{{ host_ip }}:{{ router_service_mapping[router_service].port }}"
+{% endfor %}

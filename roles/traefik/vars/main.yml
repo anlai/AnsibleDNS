@@ -1,0 +1,25 @@
+---
+
+traefik_dashboard: false
+traefik_networkmode: 'bridge'
+
+traefik_update_image: yes
+
+traefik_manage_image: no
+traefik_config_dns: no
+
+# host root folder for docker data
+host_name: 'NOT_SET'
+host_root: 'NOT_SET'
+host_ip: 'NOT_SET'
+
+# cloudflare credentials
+cloudflare_email:
+cloudflare_token:
+cloudflare_domain:
+cloudflare_sans:
+
+# router mapping
+router_service_mapping:
+
+tmp_root: "~/tmp_{{ host_name }}"

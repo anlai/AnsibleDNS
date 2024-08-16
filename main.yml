@@ -1,0 +1,19 @@
+---
+
+- name: Network DNS Configuration
+  hosts: all
+  
+  vars:
+    timezone: America/Los_Angeles
+    update_containers: no
+
+  vars_files:
+  - ./config/secrets.yml
+  - ./config/mapping.yml
+
+  tasks:
+  - include_tasks: tasks/pihole_server.yml
+    when: dns_config
+
+  - include_tasks: tasks/reverse_proxy.yml
+    when: reverse_proxy_install or reverse_proxy_config

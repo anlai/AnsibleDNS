@@ -1,0 +1,24 @@
+---
+
+- block:    
+  - name: PiHole - Hash Password
+    shell: |
+      echo -n {{ pihole.password }} | sha256sum | awk '{printf "%s", $1}' | sha256sum | awk '{printf "%s", $1}'
+    register: hashed_webpassword
+
+  - name: PiHole - Install
+    include_role:
+      name: zfuller.pihole
+    vars:
+      pihole_setupvars_ipv4_address: "{{ ansible_host }}"
+      pihole_setupvars_webpassword: "{{ hashed_webpassword.stdout }}"
+
+  - name: PiHole - Template DNS List
+    template:
+      src: templates/pihole-dns
+      dest: "{{ data_root }}/custom.list"
+
+  - name: PiHole - Restart DNS Resolver
+    shell: |
+      pihole restartdns reload
+  become: yes

@@ -1,0 +1,38 @@
+---
+
+- name: Set Docker.sock Permissions
+  file:
+    path: /var/run/docker.sock
+    mode: 0666
+  when: reverse_proxy_install
+  become: yes
+
+- name: Get List of DNS Names
+  set_fact:
+    services: "{{ dns | selectattr('ip', 'eq', ansible_host) }}"
+
+- name: Create Service Mappings
+  set_fact:
+    service_mappings: "{{ service_mappings | default({}) | combine({ (item.dns|replace('.'+domain, '')): { 'port': item.port, 'https': item.https if item.https is defined else False } }) }}"
+  with_items: "{{ services }}"
+
+- name: Show Server Mappings
+  debug:
+    var: service_mappings
+
+- name: Install Reverse Proxy
+  include_role:
+    name: traefik
+  vars:
+    host_root: "{{ data_root }}"
+    host_ip: "{{ ansible_host }}"
+    host_name: "{{ inventory_hostname | replace('dns_', '') }}"
+    cloudflare_email: "{{ cloudflare.email }}"
+    cloudflare_token: "{{ cloudflare.token }}"
+    cloudflare_domain: "{{ domain }}"
+    cloudflare_sans: "{{ cloudflare.sans }}"
+    router_service_mapping: "{{ service_mappings }}"
+    traefik_dashboard: true
+    traefik_update_image: "{{ update_containers }}"
+    traefik_manage_image: "{{ reverse_proxy_install }}"
+    traefik_config_dns: "{{ reverse_proxy_config }}"

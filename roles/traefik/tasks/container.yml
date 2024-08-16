@@ -1,0 +1,55 @@
+---
+
+- name: Traefik - Directories
+  become: yes
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: "0777"
+    owner: "root"
+  with_items:
+    - "{{host_root}}/traefik"
+    - "{{host_root}}/traefik/config"
+    - "{{host_root}}/traefik/letsencrypt"
+
+- name: Traefik - Lets Encrypt Directories
+  become: yes
+  file:
+    path: "{{host_root}}/traefik/letsencrypt"
+    state: directory
+    mode: "0600"
+    owner: "root"
+
+- name: Traefik - Ports
+  set_fact:
+    ports:
+    - "80:80"
+    - "443:443"
+  when: not traefik_dashboard
+
+- name: Traefik - Ports
+  set_fact:
+    ports:
+    - "80:80"
+    - "443:443"
+    - "8080:8080"
+  when: traefik_dashboard
+
+# https://major.io/2021/08/16/wildcard-letsencrypt-certificates-traefik-cloudflare/
+- name: Traefik - Install
+  docker_container:
+    name: traefik
+    image: "traefik:latest"
+    state: started
+    restart: yes
+    restart_policy: unless-stopped
+    pull: "{{ traefik_update_image }}"
+    published_ports: "{{ ports }}"
+    network_mode: "{{ traefik_networkmode }}"
+    env:
+      CLOUDFLARE_EMAIL: "{{ cloudflare_email }}"
+      CLOUDFLARE_DNS_API_TOKEN: "{{ cloudflare_token }}"
+    volumes:
+      - "{{host_root}}/traefik/config:/etc/traefik/"
+      - "{{host_root}}/traefik/letsencrypt:/letsencrypt"
+      - /var/run/docker.sock:/var/run/docker.sock:ro

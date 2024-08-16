@@ -1,0 +1,42 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+serversTransport:
+  insecureSkipVerify: true
+
+api:
+  insecure: true
+  dashboard: true
+
+providers:
+  file:
+    filename: "/etc/traefik/traefik-router.yml"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      dnschallenge:
+        provider: cloudflare
+      email: "{{ cloudflare_email }}"
+      storage: "/letsencrypt/acme.json"
+
+entrypoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+        domains:
+        - main: "{{ cloudflare_domain }}"
+          sans: "{{ cloudflare_sans }}"
+    forwardedHeaders:
+      trustedIPs: 
+      - "192.168.1.0/24" # intranet IP range

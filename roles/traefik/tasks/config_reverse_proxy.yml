@@ -1,0 +1,32 @@
+---
+
+# This method templates it locally then copies it to the hosts
+- block:
+  - name: Tmp Folder Exists
+    file:
+      path: "{{ tmp_root }}"
+      state: directory
+
+  - name: Template Files
+    template:
+      src: "../templates/{{item.template}}.j2"
+      dest: "{{tmp_root}}/{{item.output}}"
+    with_items:
+      - template: traefik-config.yml
+        output: traefik.yml
+      - template: traefik-router.yml
+        output: traefik-router.yml
+
+  - name: Copy Config to Host
+    shell: |
+      scp {{ tmp_root }}/{{ item }} {{ansible_user}}@{{host_ip}}:{{data_root}}/traefik/config/{{item}}
+    with_items:
+      - traefik.yml
+      - traefik-router.yml
+
+  - name: Delete tmp Folder
+    file:
+      path: "{{ tmp_root }}"
+      state: absent
+
+  delegate_to: 127.0.0.1

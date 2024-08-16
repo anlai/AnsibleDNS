@@ -1,0 +1,3 @@
+{% for host in dns %}
+{{ host.ip }} {{ host.dns }}
+{% endfor %}

@@ -1,0 +1,7 @@
+---
+
+- include_tasks: container.yml
+  when: traefik_manage_image
+
+- include_tasks: config_reverse_proxy.yml
+  when: traefik_config_dns
