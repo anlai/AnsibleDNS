@@ -23,7 +23,21 @@ Ansible playbook to manage custom sub-domains across my private network.  The ad
 
 1. Execute `ansible-galaxy install -r ./requirements.yml`
 2. Create configuration files: secrets.yml, mapping.hml, inventory.yml (see [Configuration Files](#Configuration-Files))
-3. To run against all hosts, you can use `./run.sh` as is, there is also another commented example to run on dns servers only
+3. You can call the ansible-playbook directly, but there is a bash script you can use.  Here are some example calls:
+
+```bash
+# run against all hosts
+./run.sh
+
+# run only against dns hosts
+./run.sh dns
+
+# run only against docker hosts
+./run.sh docker
+
+# run only against unmanaged hosts (config only)
+./run.sh unmanaged
+```
 
 ### Configuration Files
 

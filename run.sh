@@ -1,6 +1,9 @@
 #!/bin/bash
 
-ansible-playbook -i ./config/inventory.yml ./main.yml -K
+GROUP=${1:-all}
 
-# run only against the dns group
-# ansible-playbook -i ./config/inventory.yml -l dns ./main.yml -K
+if [ $GROUP -ne 'all' ]; then
+  ansible-playbook -i ./config/inventory.yml -l "$GROUP" ./main.yml -K  
+else
+  ansible-playbook -i ./config/inventory.yml ./main.yml -K
+fi
